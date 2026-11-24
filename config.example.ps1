@@ -4,15 +4,17 @@
 # ============================================================
 
 # Where the server, worlds, plugins, Java runtime and backups live.
-# Keep this OUT of cloud-synced folders (OneDrive, Dropbox, Synology Drive):
+# Leave "" to keep everything in this folder, next to launch.bat.
+# Keep it OUT of cloud-synced folders (OneDrive, Dropbox, Synology Drive):
 # syncing files while the server writes them can corrupt worlds.
-$ServerDir = "$env:USERPROFILE\MinecraftJavaServer"
+$ServerDir = ""
 
 # Existing world folder to copy in on first run (leave "" for a fresh world).
 # The original is never modified. The world's folder name becomes the level name.
 $WorldImportPath = ""
 
-# World folder name inside ServerDir. Leave "" to use the imported world's name (or "world").
+# World folder name inside ServerDir. Leave "" to use the imported world's name,
+# or "world" (Minecraft's standard name) for a new world.
 $LevelName = ""
 
 # "latest" follows the newest Minecraft release that Paper has a stable build for.
@@ -27,11 +29,13 @@ $ExtraJavaArgs = @()
 
 # ---- CurseForge plugins ----
 # Get a free API key at https://console.curseforge.com (sign in, then "API keys").
-$CurseForgeApiKey = ""
+# Keep the SINGLE quotes: keys contain $ signs, which double quotes would mangle.
+$CurseForgeApiKey = ''
 
 # Bukkit/Paper plugins to install and keep updated. Use the project's slug
 # (the last part of its curseforge.com/minecraft/bukkit-plugins/<slug> URL)
-# or its numeric Project ID. Remove a line to uninstall that plugin.
+# or its numeric Project ID, one per line in quotes. Lines starting with # are
+# ignored. Remove a line to uninstall that plugin. Changes apply on restart.
 $CurseForgePlugins = @(
     # "worldedit"
     # "essentialsx"
@@ -44,7 +48,7 @@ $BackupsToKeep = 7
 
 # ---- No-IP DDNS ----  leave Username empty to skip
 $NoIP_Username = ""
-$NoIP_Password = ""
+$NoIP_Password = ''   # single quotes, in case it contains a $
 $NoIP_Hostname = ""
 
 # Hour (24h) to check for Paper / Java / plugin updates each day

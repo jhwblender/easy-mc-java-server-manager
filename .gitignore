@@ -1,11 +1,18 @@
-# Personal settings (API keys, passwords)
-config.ps1
+# The server runs from this folder by default, so ignore everything
+# (worlds, server.properties, plugins, Java runtime, backups, logs...)
+# and list only the manager's own files.
+/*
+!/.gitattributes
+!/.gitignore
+!/LICENSE
+!/README.md
+!/Start-JavaServer.ps1
+!/config.example.ps1
+!/launch.bat
+!/stop.bat
 
-# Server data, if ServerDir is pointed inside the repo
-server/
-*.jar
-*.zip
-logs/
+# Personal settings (API keys, passwords) - never commit
+config.ps1
 
 # Self-update temp file
 _Update-JavaServer.ps1

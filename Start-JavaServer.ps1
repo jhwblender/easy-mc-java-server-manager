@@ -35,9 +35,8 @@ function New-Config($path) {
     Write-Host "  (Press Enter to accept the [default].)" -ForegroundColor Gray
     Write-Host ""
 
-    $defaultDir = "$env:USERPROFILE\MinecraftJavaServer"
-    $dir = Read-Host "  Folder for server files and worlds [default: $defaultDir]"
-    if (-not $dir) { $dir = $defaultDir }
+    # Blank keeps ServerDir = "" (this script's folder), so the folder can be moved or renamed later
+    $dir = Read-Host "  Folder for server files and worlds [default: this folder, $PSScriptRoot]"
 
     $world = Read-Host "  Existing world folder to import (copied, not moved) [leave blank for a new world]"
 
@@ -58,15 +57,18 @@ function New-Config($path) {
     $hourInput = Read-Host "  Hour to check for updates 0-23 [default: 4]"
     $hour = if ($hourInput -match '^\d+$' -and [int]$hourInput -le 23) { $hourInput } else { "4" }
 
+    # Single-quoted so PowerShell keeps '$' as-is: CurseForge keys look like '$2a$10$...'
+    function ConvertTo-PsLiteral($s) { "'" + "$s".Replace("'", "''") + "'" }
+
     $content = Get-Content $examplePath -Raw
     $values = @{
-        ServerDir        = "`"$dir`""
-        WorldImportPath  = "`"$world`""
+        ServerDir        = ConvertTo-PsLiteral $dir
+        WorldImportPath  = ConvertTo-PsLiteral $world
         MaxMemoryGB      = $mem
-        CurseForgeApiKey = "`"$cfKey`""
-        NoIP_Username    = "`"$username`""
-        NoIP_Password    = "`"$($password -replace '"','`"')`""
-        NoIP_Hostname    = "`"$hostname`""
+        CurseForgeApiKey = ConvertTo-PsLiteral $cfKey
+        NoIP_Username    = ConvertTo-PsLiteral $username
+        NoIP_Password    = ConvertTo-PsLiteral $password
+        NoIP_Hostname    = ConvertTo-PsLiteral $hostname
         UpdateCheckHour  = $hour
     }
     foreach ($k in $values.Keys) {
@@ -88,7 +90,7 @@ if (!(Test-Path $configPath)) {
 }
 
 # Defaults (overridden by config.ps1) so older configs keep working
-$ServerDir         = "$env:USERPROFILE\MinecraftJavaServer"
+$ServerDir         = ""   # "" = this script's folder
 $LevelName         = ""
 $WorldImportPath   = ""
 $MinecraftVersion  = "latest"
@@ -117,7 +119,9 @@ function Write-Log($msg, $color = "White") {
 }
 
 function Resolve-Paths {
-    $script:ServerDir   = [IO.Path]::GetFullPath([Environment]::ExpandEnvironmentVariables($ServerDir))
+    # "" (the default) keeps the server, world and everything else next to this script
+    $dir = if ($ServerDir) { [Environment]::ExpandEnvironmentVariables($ServerDir) } else { $PSScriptRoot }
+    $script:ServerDir   = [IO.Path]::GetFullPath($dir)
     $script:RuntimeDir  = Join-Path $ServerDir "runtime"
     $script:PluginsDir  = Join-Path $ServerDir "plugins"
     $script:StateFile   = Join-Path $ServerDir "manager-state.json"
@@ -420,7 +424,14 @@ function Set-ServerProperty($key, $value) {
 
 function Initialize-World {
     $level = Get-LevelName
+    $isNewServer = !(Test-Path (Join-Path $ServerDir "server.properties"))
     Set-ServerProperty "level-name" $level
+    if ($isNewServer) {
+        # Open server by default: anyone can join, and `ban <player>` keeps people out.
+        # Only set on first setup, so later edits to server.properties are kept.
+        Set-ServerProperty "white-list" "false"
+        Set-ServerProperty "enforce-whitelist" "false"
+    }
     $target = Join-Path $ServerDir $level
     if ($WorldImportPath -and !(Test-Path $target)) {
         $src = [Environment]::ExpandEnvironmentVariables($WorldImportPath)

@@ -25,7 +25,9 @@ It's the Java Edition sibling of [easy-bedrock-server-manager](https://github.co
 
 The first run downloads Java (~60 MB) and Paper (~55 MB), then starts the server. Players connect to your PC's IP on port **25565**. For people outside your home network, forward TCP port 25565 on your router.
 
-> **Keep the server folder out of cloud-synced folders** (OneDrive, Dropbox, Google Drive, Synology Drive). Syncing files while the server writes them can corrupt your world. The script itself can live anywhere; only `ServerDir` matters.
+By default the server, world and everything else live in the same folder as `launch.bat`. Set `ServerDir` to put them somewhere else.
+
+> **Keep the server folder out of cloud-synced folders** (OneDrive, Dropbox, Google Drive, Synology Drive). Syncing files while the server writes them can corrupt your world.
 
 ## Using it
 
@@ -34,14 +36,16 @@ The first run downloads Java (~60 MB) and Paper (~55 MB), then starts the server
 | Run a server command | Type it into the manager window (e.g. `op Steve`, `say hi`, `whitelist add Alex`) |
 | Stop the server cleanly | Type `stop` in the window, or double-click **`stop.bat`** |
 | Change settings | Edit `config.ps1`. Plugin and version changes apply at the next update check or restart |
-| Change game settings | Edit `server.properties` inside your server folder, then restart |
+| Change game settings | Edit `server.properties` (next to `launch.bat` by default), then restart |
+| Keep someone out | `ban <player>` (`pardon <player>` to undo). New servers start with the whitelist **off**, so anyone with your address can join |
+| Allow only listed players | `whitelist on`, then `whitelist add <player>` for each person |
 
 ## Plugins from CurseForge
 
 CurseForge requires an API key to download files:
 
 1. Sign in at <https://console.curseforge.com> and create an API key (free).
-2. Put it in `config.ps1` as `$CurseForgeApiKey = "..."`.
+2. Put it in `config.ps1` in **single** quotes: `$CurseForgeApiKey = '$2a$10$...'`. Keys contain `$` signs, which PowerShell treats as variables inside double quotes.
 3. Add plugins by slug: the last part of `https://www.curseforge.com/minecraft/bukkit-plugins/<slug>`.
 
 ```powershell
@@ -61,9 +65,9 @@ Everything lives in `config.ps1` (created from [`config.example.ps1`](config.exa
 
 | Setting | Default | |
 |---|---|---|
-| `ServerDir` | `%USERPROFILE%\MinecraftJavaServer` | Server, worlds, plugins, Java runtime, backups |
+| `ServerDir` | `""` (this folder) | Server, worlds, plugins, Java runtime, backups |
 | `WorldImportPath` | `""` | World folder to copy in on first run |
-| `LevelName` | `""` | World folder name (defaults to the imported world's name) |
+| `LevelName` | `""` | World folder name (the imported world's name, or `world`) |
 | `MinecraftVersion` | `"latest"` | Or pin e.g. `"26.3"` |
 | `MaxMemoryGB` | `4` | Server RAM |
 | `CurseForgeApiKey` / `CurseForgePlugins` | | See above |
@@ -76,11 +80,12 @@ Everything lives in `config.ps1` (created from [`config.example.ps1`](config.exa
 ## Server folder layout
 
 ```
-MinecraftJavaServer\
+<this folder>\
+  launch.bat, stop.bat, Start-JavaServer.ps1, config.ps1
   paper.jar             server (managed)
   runtime\java-25\      Java (managed)
   plugins\              your plugins
-  <world>\              your world
+  world\                your world (or the imported world's name)
   backups\              world backups
   manager-state.json    what the manager installed
   server.properties ... normal Paper/Minecraft files
