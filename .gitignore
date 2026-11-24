@@ -1,0 +1,11 @@
+# Personal settings (API keys, passwords)
+config.ps1
+
+# Server data, if ServerDir is pointed inside the repo
+server/
+*.jar
+*.zip
+logs/
+
+# Self-update temp file
+_Update-JavaServer.ps1
