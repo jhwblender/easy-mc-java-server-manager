@@ -18,7 +18,7 @@
 #   - Type any server command into this window to send it
 # ============================================================
 
-$ScriptVersion = "0.1.0"
+$ScriptVersion = "0.2.0"
 $RepoSlug      = "jhwblender/easy-mc-java-server-manager"
 $UserAgent     = "easy-mc-java-server-manager/$ScriptVersion (+https://github.com/$RepoSlug)"
 
